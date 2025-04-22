@@ -1,8 +1,20 @@
 const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+
 const app = express();
 
-app.get("/", (req, res) => res.send("Congratulation 🎉🎉! Our Express server is Running on Vercel"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use(cookieParser());
 
-app.listen(4000, () => console.log("Server ready on port 3000."));
+app.get("/", (req, res) => res.send("Hello world"));
+
+//TODO: Change the origin to deployed frontend URL
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 
 module.exports = app;
