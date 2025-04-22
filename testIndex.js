@@ -3,7 +3,7 @@ require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient()
 //express app
-const app = require("./app");
+const app = require("./app.js");
 
 //port
 const port = process.env.PORT || 4000;
