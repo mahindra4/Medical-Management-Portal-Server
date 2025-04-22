@@ -73,9 +73,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-// app.listen(port, () => {
-//   console.log("Server is running on port 4000");
-// });
-
-const serverless = require("serverless-http");
-module.exports = serverless(app);
+app.listen(port, () => {
+  console.log("Server is running on port 4000");
+});
