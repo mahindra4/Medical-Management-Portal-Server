@@ -107,7 +107,10 @@ const roleMapping = new Map([
     ["GET_DIAGNOSIS_SYMPTOMS_LIST", ["D", "PM"]],
 
     // hospital routes
-    ["GET_HOSPITAL_LIST", ["D", "PM", "A"]],
+    ["GET_HOSPITAL_LIST", ["D","PM","A"]],
+    ["ADD_HOSPITAL", ["D","PM","A"]],
+    ["UPDATE_HOSPITAL", ["D","PM","A"]],
+    ["DELETE_HOSPITAL", ["D","PM","A"]],
 
     // patient vital routes (from merged version)
     ["GET_PATIENT_VITAL_LIST", ["D", "PM"]],

@@ -3,8 +3,9 @@ const prisma = new PrismaClient();
 
 const getDiagnosisSymptomsList = async (req, res, next) => {
     try{
+        console.log('-------siudhf asduhfu asbf 8hsa hf');
         const diagnosisSymptomsList = await prisma.diagnosisSymptoms.findMany();
-        // console.log(diagnosisSymptomsList)
+        console.log("diagnos symptoms list: ",diagnosisSymptomsList);
         const formattedData = diagnosisSymptomsList.reduce((acc,{diagnosis,symptom}) => {
             if(!acc[diagnosis]){
                 acc[diagnosis] = []
