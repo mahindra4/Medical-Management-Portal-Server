@@ -56,13 +56,15 @@ const getDiagnosisListById = async(req, res, next) => {
 
 const getDiagnosisSymptomListNonFormatted = async (req, res, next) => {
     try{
-        console.log('............a;sduhfsauhfashdfliuhsa................uaydgfysadg fuh')
-        const diagnosisSymptomsList = await prisma.diagnosisSymptoms.findMany();    
+        // console.log('............a;sduhfsauhfashdfliuhsa................uaydgfysadg fuh')
+        const diagnosisSymptomsList = await prisma.diagnosisSymptoms.findMany({
+            orderBy: {id: 'asc'},
+        });    
         console.log(diagnosisSymptomsList.length)
         return res.status(200).json({
             ok: true,
             data: diagnosisSymptomsList,
-            message: "Diagnosis-Symptoms List fetched successfully as8dhf as"
+            message: "Diagnosis-Symptoms List fetched successfully fetched"
         })
 
     } catch(err){
@@ -166,6 +168,7 @@ const updateDiagnosis = async (req, res, next) => {
     try{
         const {id} = req.params;
         const {diagnosis, symptom} = req.body;
+        console.log('updateDiagnosis: ', id, diagnosis, symptom)
         const updatedDiagnosis = await prisma.diagnosisSymptoms.update({
             where: {
                 id: id
