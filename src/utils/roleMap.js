@@ -15,14 +15,14 @@ const roleMapping = new Map([
     // checkup routes
     ["GET_MEDICAL_HISTORY", ["P"]],
     ["GET_CHECKUP_DETAILS", ["D", "A", "PM", "P"]],
-    ["GET_CHECKUP_LIST", ["D", "A", "PM"]],
+    ["GET_CHECKUP_LIST", ["D", "A", "PM", "P"]],
     ["CREATE_CHECKUP", ["D", "A", "PM"]],
     ["UPDATE_CHECKUP", ["D", "A", "PM"]],
     ["DELETE_CHECKUP", ["D", "A", "PM"]],
 
     // observation routes (from your version)
     ["CREATE_OBSERVATION", ["D", "PM"]],
-    ["GET_OBSERVATION", ["D", "PM"]],
+    ["GET_OBSERVATION", ["D", "PM" , "P"]],
     ["UPDATE_OBSERVATION", ["D", "PM"]],
     ["DELETE_OBSERVATION", ["D", "PM"]],
 
@@ -107,7 +107,10 @@ const roleMapping = new Map([
     ["GET_DIAGNOSIS_SYMPTOMS_LIST", ["D", "PM"]],
 
     // hospital routes
-    ["GET_HOSPITAL_LIST", ["D", "PM"]],
+    ["GET_HOSPITAL_LIST", ["D","PM","A"]],
+    ["ADD_HOSPITAL", ["D","PM","A"]],
+    ["UPDATE_HOSPITAL", ["D","PM","A"]],
+    ["DELETE_HOSPITAL", ["D","PM","A"]],
 
     // patient vital routes (from merged version)
     ["GET_PATIENT_VITAL_LIST", ["D", "PM"]],
@@ -116,11 +119,16 @@ const roleMapping = new Map([
     ["DELETE_PATIENT_VITALS", ["D", "PM"]],
 
     // procedure routes (from merged version)
-    ["GET_PROCEDURE_LIST", ["D", "PM"]],
-    ["GET_PROCEDURE", ["D", "PM"]],
-    ["CREATE_PROCEDURE", ["D", "PM"]],
-    ["UPDATE_PROCEDURE", ["D", "PM"]],
-    ["DELETE_PROCEDURE", ["D", "PM"]],
+    ["GET_PROCEDURE_LIST", ["D", "PM", "A"]],
+    ["GET_PROCEDURE", ["D", "PM", "A"]],
+    ["CREATE_PROCEDURE", ["D", "PM", "A"]],
+    ["UPDATE_PROCEDURE", ["D", "PM", "A"]],
+    ["DELETE_PROCEDURE", ["D", "PM", "A"]],
+
+    // extra routes   
+    ["ADD_DIAGNOSIS", ["D", "PM"]],
+    ["DELETE_DIAGNOSIS_SYMPTOM", ["D", "PM"]],
+    ["UPDATE_DIAGNOSIS_SYMPTOM", ["D", "PM"]],
 ]);
 
 const numToRoleMapping = new Map([

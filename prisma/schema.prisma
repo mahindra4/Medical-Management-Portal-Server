@@ -4,7 +4,6 @@
 // In prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
- 
 }
 
 datasource db {
@@ -39,16 +38,16 @@ model Verification {
 }
 
 model Medicine {
-  id              String            @id @default(uuid())
-  brandName       String
-  saltName        String
-  categoryId      String
-  Stock           Stock[]
-  Purchases       Purchase[]
-  CheckupMedicine CheckupMedicine[]
+  id                 String               @id @default(uuid())
+  brandName          String
+  saltName           String
+  categoryId         String
+  Stock              Stock[]
+  Purchases          Purchase[]
+  CheckupMedicine    CheckupMedicine[]
   ObservationDetails ObservationDetails[]
-  status          Status            @default(ACTIVE)
-  Category        Category          @relation(fields: [categoryId], references: [id])
+  status             Status               @default(ACTIVE)
+  Category           Category             @relation(fields: [categoryId], references: [id])
 
   @@map("medicine")
 }
@@ -233,14 +232,14 @@ model Hospitals {
 }
 
 model Procedure {
-  id                      String    @unique
-  patientEmail            String
-  patientName             String
-  inTime                  DateTime
-  procedureRecord         String
-  patientConditionBefore  String
-  referredHospital        String
-  outTime                 DateTime?
+  id                     String    @unique
+  patientEmail           String
+  patientName            String
+  inTime                 DateTime
+  procedureRecord        String
+  patientConditionBefore String
+  referredHospital       String
+  outTime                DateTime?
 
   @@map("procedures")
 }
@@ -252,14 +251,14 @@ model OpdCounter {
 }
 
 model PatientUnderObs {
-  id               String             @id @default(uuid())
-  checkupId        String             @unique
-  checkup          Checkup            @relation(fields: [checkupId], references: [id])
-  observationId    String             @unique
-  observation      ObservationDetails @relation(fields: [observationId], references: [id])
-  isUnderObservation Boolean          @default(false)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                 String             @id @default(uuid())
+  checkupId          String             @unique
+  checkup            Checkup            @relation(fields: [checkupId], references: [id])
+  observationId      String             @unique
+  observation        ObservationDetails @relation(fields: [observationId], references: [id])
+  isUnderObservation Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   @@map("patient_under_obs")
 }

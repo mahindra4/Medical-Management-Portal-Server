@@ -41,12 +41,12 @@ const sendOtp = async (req, res, next) => {
       email,
     },
     update: {
-      otp: "0000", 
+      otp, 
       expiryTime: expiry,
     },
     create: {
       email: email,
-      otp: "0000",
+      otp,
       expiryTime: expiry,
     },
   });

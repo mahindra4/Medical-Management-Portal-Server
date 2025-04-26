@@ -13,7 +13,8 @@ const getPatientList = async (req, res, next) => {
       status: "ACTIVE",
     },
   });
-  return res.status(200).json({
+  console.log('successfully retrived patient list');  
+return res.status(200).json({
     ok: true,
     data: patientList,
     message: "Patient List retrieved successfully",

@@ -26,4 +26,12 @@ router.get('/:id', authMiddleware(roleMap("GET_PATIENT")), catchAsync(getPatient
 router.put('/:id', authMiddleware(roleMap("UPDATE_PATIENT")), validatePatient, catchAsync(updatePatient));
 router.delete('/:id', authMiddleware(roleMap("DELETE_PATIENT")), catchAsync(deletePatient));
 
+
+
+// router.post('/', catchAsync(createPatient));
+// router.get('/', catchAsync(getPatientList));
+// router.get('/:id', catchAsync(getPatient));
+// router.put('/:id', catchAsync(updatePatient));
+// router.delete('/:id', catchAsync(deletePatient));
+
 module.exports = router;
