@@ -279,6 +279,21 @@ model ObservationDetails {
   @@map("observation_details")
 }
 
+model VisitingSpecialist {
+  id             String   @id @default(uuid())
+  name           String
+  specialization String
+  availableTime  String
+  availableDays  String[]
+  contactNumber  String
+  email          String?
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("VisitingSpecialist")
+}
+
 enum EquipmentType {
   SALINE
   INJECTION

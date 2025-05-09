@@ -183,6 +183,23 @@ const verifyOtpSchema = Joi.object({
   otp: Joi.string().required(),
 });
 
+// const sendOtpSchema = Joi.object({
+//   email: Joi.string()
+//     .email()
+//     .pattern(/^[a-zA-Z0-9._%+-]+@iitrpr\.ac\.in$/)
+//     .required(),
+//   action: Joi.string().valid("LOGIN", "SIGNUP").required(),
+// });
+
+// const verifyOtpSchema = Joi.object({
+//   email: Joi.string()
+//     .email()
+//     .pattern(/^[a-zA-Z0-9._%+-]+@iitrpr\.ac\.in$/)
+//     .required(),
+//   otp: Joi.string().required(),
+// });
+
+
 // User Schema
 const userSchema = Joi.object({
   email: Joi.string().email().required(),

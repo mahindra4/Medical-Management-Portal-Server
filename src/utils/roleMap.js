@@ -120,7 +120,7 @@ const roleMapping = new Map([
 
     // procedure routes (from merged version)
     ["GET_PROCEDURE_LIST", ["D", "PM", "A"]],
-    ["GET_PROCEDURE", ["D", "PM", "A"]],
+    ["GET_PROCEDURE", ["D", "PM", "A", "P"]],
     ["CREATE_PROCEDURE", ["D", "PM", "A"]],
     ["UPDATE_PROCEDURE", ["D", "PM", "A"]],
     ["DELETE_PROCEDURE", ["D", "PM", "A"]],
@@ -129,6 +129,14 @@ const roleMapping = new Map([
     ["ADD_DIAGNOSIS", ["D", "PM"]],
     ["DELETE_DIAGNOSIS_SYMPTOM", ["D", "PM"]],
     ["UPDATE_DIAGNOSIS_SYMPTOM", ["D", "PM"]],
+
+
+    //specialist routes 
+    ["GET_SPECIALIST_LIST", ["D", "A", "PM", "P"]],
+    ["GET_SPECIALIST", ["D", "A", "PM", "P"]],
+    ["CREATE_SPECIALIST", ["D", "A", "PM"]],
+    ["UPDATE_SPECIALIST", ["D", "A", "PM"]],
+    ["DELETE_SPECIALIST", ["D", "A", "PM"]],
 ]);
 
 const numToRoleMapping = new Map([
