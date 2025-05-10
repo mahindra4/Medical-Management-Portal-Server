@@ -25,6 +25,7 @@ const roleMapping = new Map([
     ["GET_OBSERVATION", ["D", "PM" , "P"]],
     ["UPDATE_OBSERVATION", ["D", "PM"]],
     ["DELETE_OBSERVATION", ["D", "PM"]],
+    ["GET_OBSERVATION_HISTORY", ["P"]], 
 
     // dashboard routes
     ["GET_CHECKUP_STAT", ["D", "A", "PM"]],

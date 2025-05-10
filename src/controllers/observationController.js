@@ -333,9 +333,74 @@ const deleteObservation = async (req, res, next) => {
   }
 };
 
+const getPatientObservationHistory = async (req, res, next) => {
+  try {
+
+    // Verify patient can only access their own records
+    if (req.user.role === 'PATIENT' && req.params.email !== req.user.email) {
+      throw new ExpressError('Unauthorized to view other patient records', 403);
+    }
+    console.log('obs hist 1');
+    const observations = await prisma.patientUnderObs.findMany({
+      where: { 
+        checkup: {
+          Patient: { 
+            email: req.params.email 
+          }
+        }
+      },
+      include: {
+        checkup: {
+          include: {
+            Patient: { select: { name: true, email: true } },
+            Doctor: { select: { name: true } },
+            Staff: { select: { name: true } },
+          }
+        },
+        observation: {
+          include: {
+            medicine: {
+              select: {
+                brandName: true,
+                saltName: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    console.log('obs hist 2');
+
+    const formattedObservations = observations.map(obs => ({
+      id: obs.id,
+      checkupId: obs.checkupId,
+      date: obs.checkup.date.toISOString().split('T')[0],
+      doctorName: obs.checkup.Doctor?.name || 'Not assigned',
+      diagnosis: obs.checkup.diagnosis,
+      medicineDetails: obs.observation?.medicine 
+        ? `${obs.observation.medicine.brandName} (${obs.observation.dosage}/${obs.observation.frequency})`
+        : '',
+      status: obs.isUnderObservation ? "Active" : "Inactive"
+    }));
+
+    console.log('obs hist 3');
+    res.status(200).json({
+      ok: true,
+      data: formattedObservations,
+      message: "Observation history retrieved successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 module.exports = {
   getAllObservations,
   getObservation,
   updateObservation,
-  deleteObservation
+  deleteObservation,
+  getPatientObservationHistory,
 };

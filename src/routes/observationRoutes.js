@@ -5,7 +5,8 @@ const {
   getAllObservations,
   getObservation,
   updateObservation,
-  deleteObservation
+  deleteObservation,
+  getPatientObservationHistory
 } = require('../controllers/observationController');
 
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -18,6 +19,12 @@ router.route('/')
     authMiddleware(roleMap("GET_OBSERVATION")),
     profileMiddleware(true),
     catchAsync(getAllObservations)
+  );
+
+router.get('/history/:email',
+    authMiddleware(roleMap("GET_OBSERVATION_HISTORY")), 
+    profileMiddleware(true),
+    catchAsync(getPatientObservationHistory)
   );
 
 router.route('/:id')
@@ -36,5 +43,6 @@ router.route('/:id')
     profileMiddleware(true),
     catchAsync(deleteObservation)
   );
+
 
 module.exports = router;
