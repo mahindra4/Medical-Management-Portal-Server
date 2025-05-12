@@ -216,19 +216,25 @@ const savePatientVitals = async (req, res) => {
         }
     
             const opdId = `OPD${formattedDate}-${newCount.toString().padStart(3, '0')}`;
-            console.log(`Generated OPD ID: ${opdId}`);   
+            console.log(`Generated OPD ID: ${opdId}`);  
 
 
         let vitals = null;
         const timeInfo = 'T' + DateTime.now().setZone('Asia/Kolkata').toISOTime({ suppressMilliseconds: true });
         console.log("id: ",id);
+        console.log('date: ',date);
+        console.log('timeInfo: ',timeInfo);
+        console.log('date-time: ',date+timeInfo);
+
+        let date_time = (date + timeInfo).split('+')[0]+'Z';
+        console.log('real full date: ', date_time);
         if(id){
             vitals = await prisma.patientVitals.update({
                 where: {id},
                 data: { id,
                         patientId,
                         temperature: parseFloat(temperature),
-                        date: date + timeInfo, 
+                        date:  date_time, 
                         bloodPressure, 
                         pulseRate: parseInt(pulseRate),
                         spO2: parseFloat(spO2),
@@ -242,7 +248,7 @@ const savePatientVitals = async (req, res) => {
                         id,
                         patientId,
                         temperature: parseFloat(temperature),
-                        date: date + timeInfo, 
+                        date: date_time, 
                         bloodPressure, 
                         pulseRate: parseInt(pulseRate),
                         spO2: parseFloat(spO2),
@@ -256,7 +262,7 @@ const savePatientVitals = async (req, res) => {
                 data: { id: opdId,
                         patientId,
                         temperature: parseFloat(temperature),
-                        date: jsDate, 
+                        date: date_time, 
                         bloodPressure, 
                         pulseRate: parseInt(pulseRate),
                         spO2: parseFloat(spO2),
