@@ -2,6 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const ExpressError = require("../utils/ExpressError");
 const formatTimeFromISO = require("../utils/formatTimeFromISO");
+const { DateTime } = require("luxon");
 
 // @desc    Get Checkup Details
 // route    GET /api/checkup/:id
@@ -83,7 +84,7 @@ const getCheckupDetails = async (req, res, next) => {
     pulseRate: checkup?.pulseRate,
     spO2: checkup.spO2,
     checkupMedicines: checkup.CheckupMedicine.map((medicine) => ({
-      id: medicine?.id,
+      id: medicine.Medicine?.id,
       brandName: medicine.Medicine?.brandName,
       dosage: medicine?.dosage,
       quantity: medicine?.quantity,
@@ -355,14 +356,15 @@ const createCheckup = async (req, res, next) => {
   // Create everything in a transaction
   const result = await prisma.$transaction(async (prisma) => {
     // 1. Create the base checkup
-    let timeInfo = new Date().toISOString().split('T')[1];
+    const timeInfo = 'T' + DateTime.now().setZone('Asia/Kolkata').toISOTime({ suppressMilliseconds: true });
+    let date_time = (date + timeInfo).split('+')[0]+'Z';
     const createdCheckup = await prisma.checkup.create({
       data: {
         id,
         patientId,
         doctorId,
         staffId: staff.id,
-        date: date + "T" + timeInfo,
+        date: date_time,
         diagnosis,
         symptoms,
         temperature: parseFloat(temperature),
@@ -435,10 +437,166 @@ const createCheckup = async (req, res, next) => {
   });
 };
 
+
+const updateCheckup = async (req, res, next) => {
+  const { id } = req.params;
+  const {
+    patientId,
+    doctorId,
+    staffEmail,
+    date,
+    diagnosis,
+    symptoms,
+    temperature,
+    bloodPressure,
+    pulseRate,
+    spO2,
+    checkupMedicines,
+    referredDoctor,
+    referredHospital,
+    isUnderObservation,
+    observationDetails
+  } = req.body;
+
+  // Validate checkup exists
+  const existingCheckup = await prisma.checkup.findUnique({ where: { id } });
+  if (!existingCheckup) {
+    throw new ExpressError("Checkup not found", 404);
+  }
+
+  // Validate patient
+  const patient = await prisma.patient.findUnique({ where: { id: patientId } });
+  if (!patient) throw new ExpressError("Patient does not exist", 404);
+
+  // Validate doctor if provided
+  if (doctorId) {
+    const doctor = await prisma.staff.findUnique({ where: { id: doctorId, role: "DOCTOR" } });
+    if (!doctor) throw new ExpressError("Doctor does not exist", 404);
+  }
+
+  // Validate staff
+  const staff = await prisma.staff.findUnique({ where: { email: staffEmail } });
+  if (!staff) throw new ExpressError("Staff not found", 404);
+
+  // Validate and prepare checkup medicines
+  let stockRecords = [];
+  for (const [idx, medicine] of checkupMedicines.entries()) {
+    if (medicine.quantity < 1) {
+      throw new ExpressError(`Quantity should be > 0 for medicine ${medicine.medicineId} in item ${idx + 1}`, 400);
+    }
+    const stock = await prisma.stock.findFirst({ where: { medicineId: medicine.medicineId } });
+    if (!stock || stock.stock < medicine.quantity) {
+      throw new ExpressError(`Insufficient stock for medicine ${medicine.medicineId}`, 400);
+    }
+    stockRecords.push(stock);
+  }
+
+  let observationStockRecord = null;
+  if (isUnderObservation) {
+    if (!observationDetails || !observationDetails.length) {
+      throw new ExpressError("Observation details required", 400);
+    }
+    for (const [idx, obsItem] of observationDetails.entries()) {
+      const stock = await prisma.stock.findFirst({ where: { medicineId: obsItem.medicineId } });
+      const required = obsItem.dailyQuantity * obsItem.days;
+      if (!stock || stock.stock < required) {
+        throw new ExpressError(`Insufficient stock for observation medicine ${obsItem.medicineId}`, 400);
+      }
+      observationStockRecord = stock;
+    }
+  }
+
+  const timeInfo = 'T' + DateTime.now().setZone('Asia/Kolkata').toISOTime({ suppressMilliseconds: true });
+  const date_time = (date + timeInfo).split('+')[0] + 'Z';
+
+  const result = await prisma.$transaction(async (prisma) => {
+    await prisma.checkupMedicine.deleteMany({ where: { checkupId: id } });
+
+    const updatedCheckup = await prisma.checkup.update({
+      where: { id },
+      data: {
+        patientId,
+        doctorId,
+        staffId: staff.id,
+        date: date_time,
+        diagnosis,
+        symptoms,
+        temperature: parseFloat(temperature),
+        bloodPressure,
+        pulseRate: parseInt(pulseRate),
+        spO2: parseFloat(spO2),
+        referredDoctor,
+        referredHospital,
+        CheckupMedicine: {
+          create: checkupMedicines,
+        },
+      }
+    });
+
+    if (isUnderObservation) {
+      const createdObsDetails = await prisma.observationDetails.create({
+        data: {
+          medicineId: observationDetails[0].medicineId,
+          dosage: observationDetails[0].dosage,
+          frequency: observationDetails[0].frequency,
+          dailyQuantity: observationDetails[0].dailyQuantity,
+          days: observationDetails[0].days,
+          availableQuantity: observationDetails[0].dailyQuantity * observationDetails[0].days,
+        }
+      });
+
+      await prisma.patientUnderObs.upsert({
+        where: { checkupId: id },
+        update: {
+          observationId: createdObsDetails.id,
+          isUnderObservation: true,
+        },
+        create: {
+          checkupId: id,
+          observationId: createdObsDetails.id,
+          isUnderObservation: true,
+        }
+      });
+
+      if (observationStockRecord) {
+        await prisma.stock.update({
+          where: { id: observationStockRecord.id },
+          data: {
+            outQuantity: { increment: observationDetails[0].dailyQuantity * observationDetails[0].days },
+            stock: { decrement: observationDetails[0].dailyQuantity * observationDetails[0].days },
+          }
+        });
+      }
+    }
+
+    await Promise.all(
+      checkupMedicines.map((medicine, idx) =>
+        prisma.stock.update({
+          where: { id: stockRecords[idx].id },
+          data: {
+            outQuantity: { increment: medicine.quantity },
+            stock: { decrement: medicine.quantity },
+          }
+        })
+      )
+    );
+
+    return updatedCheckup;
+  });
+
+  return res.status(200).json({
+    ok: true,
+    data: result,
+    message: "Checkup updated successfully",
+  });
+};
+
+
+
 // @desc    Update Checkup Record
 // route    PUT /api/checkup/:id
 // @access  Private (Admin)
-const updateCheckup = async (req, res, next) => {
+const updateCheckup2 = async (req, res, next) => {
   const { id } = req.params;
   const {
     patientId,

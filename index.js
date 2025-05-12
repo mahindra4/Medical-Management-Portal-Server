@@ -31,6 +31,8 @@ const hospitalRoutes = require("./src/routes/hospitalRoutes.js");
 const patientVitalRoutes = require("./src/routes/patientVitalRoutes.js");
 const procedureRoutes = require("./src/routes/procedureRoutes.js");
 const observationRoutes = require("./src/routes/observationRoutes.js");
+const VisitingSpecialistRoutes = require("./src/routes/VisitingSpecialistRoutes.js");
+
 
 // Authentication routes
 app.use("/api/otp", otpRoutes);
@@ -56,6 +58,7 @@ app.use("/api/hospitals", hospitalRoutes);
 app.use("/api/patient_vitals", patientVitalRoutes);
 app.use("/api/procedure", procedureRoutes);
 app.use("/api/observation", observationRoutes);
+app.use("/api/VisitingSpecialist", VisitingSpecialistRoutes);
 
 // Error handling
 app.all("*", (req, res) => {

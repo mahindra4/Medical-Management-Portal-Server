@@ -1,0 +1,27 @@
+require("dotenv").config();
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
+async function addPatientVitals() {
+  try {
+    const result = await prisma.Dcreate({
+      data: {
+        id: "vital_001", // Make sure this is unique
+        patientId: "patient_001", // Must exist in patient table
+        temperature: 98.6,
+        date: new Date(),
+        bloodPressure: "120/80",
+        pulseRate: 75,
+        spO2: 97.5,
+      },
+    });
+
+    console.log("Inserted:", result);
+  } catch (error) {
+    console.error("Error inserting vitals:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+addPatientVitals();

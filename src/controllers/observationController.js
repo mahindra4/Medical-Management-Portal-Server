@@ -81,25 +81,26 @@ const getAllObservations = async (req, res, next) => {
 // @access  Private (Admin, Doctor, Paramedical)
 // In your observationController.js
 const getObservation = async (req, res, next) => {
+  const id = req.params.id;
   try {
     const observation = await prisma.patientUnderObs.findUnique({
-      where: { id: req.params.id },
+      where: { id: id},
       include: {
         checkup: {
           include: {
-            Patient: { select: { name: true, email: true } },
+            Patient: { select: { id: true, name: true, email: true } },
             Doctor: { select: { name: true, email: true } },
             Staff: { select: { name: true } },
             CheckupMedicine: {
               include: {
-                Medicine: { select: { brandName: true } }
+                Medicine: { select: {id: true, brandName: true } }
               }
             }
           }
         },
         observation: {
           include: {
-            medicine: { select: { brandName: true } }
+            medicine: { select: {id: true, brandName: true } }
           }
         }
       }
@@ -116,9 +117,9 @@ const getObservation = async (req, res, next) => {
 
     const responseData = {
       id: observation.id,
-      patientName: observation.checkup.Patient.name,
-      doctorName: observation.checkup.Doctor?.name || 'Not assigned',
-      staffName: observation.checkup.Staff.name,
+      patient: observation.checkup?.Patient,
+      doctor: observation.checkup?.Doctor,
+      staffName: observation.checkup?.Staff,
       date: formattedDate,
       time: formattedTime,
       temperature: observation.checkup.temperature,
@@ -131,6 +132,7 @@ const getObservation = async (req, res, next) => {
       referredHospital: observation.checkup.referredHospital,
       isUnderObservation: observation.isUnderObservation,
       checkupMedicines: observation.checkup.CheckupMedicine.map(med => ({
+        id: med.id,
         brandName: med.Medicine.brandName,
         dosage: med.dosage,
         quantity: med.quantity
@@ -333,9 +335,74 @@ const deleteObservation = async (req, res, next) => {
   }
 };
 
+const getPatientObservationHistory = async (req, res, next) => {
+  try {
+
+    // Verify patient can only access their own records
+    if (req.user.role === 'PATIENT' && req.params.email !== req.user.email) {
+      throw new ExpressError('Unauthorized to view other patient records', 403);
+    }
+    console.log('obs hist 1');
+    const observations = await prisma.patientUnderObs.findMany({
+      where: { 
+        checkup: {
+          Patient: { 
+            email: req.params.email 
+          }
+        }
+      },
+      include: {
+        checkup: {
+          include: {
+            Patient: { select: { name: true, email: true } },
+            Doctor: { select: { name: true } },
+            Staff: { select: { name: true } },
+          }
+        },
+        observation: {
+          include: {
+            medicine: {
+              select: {
+                brandName: true,
+                saltName: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    console.log('obs hist 2');
+
+    const formattedObservations = observations.map(obs => ({
+      id: obs.id,
+      checkupId: obs.checkupId,
+      date: obs.checkup.date.toISOString().split('T')[0],
+      doctorName: obs.checkup.Doctor?.name || 'Not assigned',
+      diagnosis: obs.checkup.diagnosis,
+      medicineDetails: obs.observation?.medicine 
+        ? `${obs.observation.medicine.brandName} (${obs.observation.dosage}/${obs.observation.frequency})`
+        : '',
+      status: obs.isUnderObservation ? "Active" : "Inactive"
+    }));
+
+    console.log('obs hist 3');
+    res.status(200).json({
+      ok: true,
+      data: formattedObservations,
+      message: "Observation history retrieved successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 module.exports = {
   getAllObservations,
   getObservation,
   updateObservation,
-  deleteObservation
+  deleteObservation,
+  getPatientObservationHistory,
 };
